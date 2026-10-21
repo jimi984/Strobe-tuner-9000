@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>StrobeTune Pro — Peterson-Style Multi-Band Strobe Tuner</title>
+  <title>StrobeTune Pro — V1 Multi-Band Strobe Tuner</title>
   <style>
     :root {
       --bg: #0a0d12;
@@ -321,7 +321,7 @@
 
     canvas#ribbonCanvas {
       width: 100%;
-      height: 64px;
+      height: 104px;
       border-radius: 8px;
       background: #06090d;
       border: 1px solid #1e2736;
@@ -552,9 +552,9 @@
 
       <div class="cents-wrap">
         <div class="cents-scale">
-          <span>◄ -50¢ FLAT (CCW)</span>
+          <span>◄ -50¢ FLAT (CCW / Left)</span>
           <span id="centsPill" class="cents-pill">0.0¢</span>
-          <span>SHARP (CW) +50¢ ►</span>
+          <span>SHARP (CW / Right) +50¢ ►</span>
         </div>
         <div class="needle-track">
           <div class="needle-center-tick"></div>
@@ -567,13 +567,13 @@
     <div class="strobe-card">
       <div class="strobe-legend">
         <span>◄ FLAT (CCW / Left)</span>
-        <span>Inner = 1× Coarse • Outer = 4× Fine</span>
+        <span>Top Track = 1× Coarse • Bottom Track = 4× Vernier</span>
         <span>SHARP (CW / Right) ►</span>
       </div>
 
       <div class="canvas-row">
         <canvas id="wheelCanvas" width="500" height="500"></canvas>
-        <canvas id="ribbonCanvas" width="800" height="128"></canvas>
+        <canvas id="ribbonCanvas" width="800" height="208"></canvas>
       </div>
 
       <!-- Real-Time Harmonic Energy Bars -->
@@ -607,6 +607,7 @@
         <select id="presetSelect">
           <option value="chromatic">Chromatic (All 12 Notes)</option>
           <option value="guitar_std" selected>Guitar — E Standard (E2 A2 D3 G3 B3 E4)</option>
+          <option value="guitar_open_c">Guitar — Open C (C2 G2 C3 G3 C4 E4)</option>
           <option value="guitar_open_e">Guitar — Open E (E2 B2 E3 G#3 B3 E4)</option>
           <option value="guitar_open_g">Guitar — Open G (D2 G2 D3 G3 B3 D4)</option>
           <option value="bass_4">Bass 4-String — Standard (E1 A1 D2 G2)</option>
@@ -674,6 +675,7 @@
       const PRESETS = {
         chromatic: null,
         guitar_std: ["E2", "A2", "D3", "G3", "B3", "E4"],
+        guitar_open_c: ["C2", "G2", "C3", "G3", "C4", "E4"],
         guitar_open_e: ["E2", "B2", "E3", "G#3", "B3", "E4"],
         guitar_open_g: ["D2", "G2", "D3", "G3", "B3", "D4"],
         bass_4: ["E1", "A1", "D2", "G2"],
@@ -714,11 +716,11 @@
       let smoothedCents = 0;
       let holdFramesRemaining = 0;
 
-      // True Peterson Multi-Band Phase Accumulators:
-      // Ring 0: 1× Fundamental (Coarse)
-      // Ring 1: 2× 1st Octave  (Medium)
-      // Ring 2: 3× 5th / Oct+5th (High)
-      // Ring 3: 4× 2nd Octave (Fine / Vernier)
+      // Multi-Band Phase Accumulators:
+      // Band 0: 1× Fundamental (Coarse)
+      // Band 1: 2× 1st Octave  (Medium)
+      // Band 2: 3× 5th / Oct+5th (High)
+      // Band 3: 4× 2nd Octave (Vernier)
       const ringPhases = [0, 0, 0, 0];
       const harmonicStrengths = [0.25, 0.25, 0.25, 0.25];
       let currentDeltaHz = 0;
@@ -833,9 +835,9 @@
 
       function updateFilterProfile() {
         if (!lpFilter || !hpFilter || !audioCtx) return;
-        const isBass = currentPreset.startsWith("bass");
-        hpFilter.frequency.setTargetAtTime(isBass ? 25 : 40, audioCtx.currentTime, 0.02);
-        lpFilter.frequency.setTargetAtTime(isBass ? 750 : 1400, audioCtx.currentTime, 0.02);
+        const isDeepLow = currentPreset.startsWith("bass") || currentPreset === "guitar_open_c";
+        hpFilter.frequency.setTargetAtTime(isDeepLow ? 22 : 38, audioCtx.currentTime, 0.02);
+        lpFilter.frequency.setTargetAtTime(isDeepLow ? 750 : 1400, audioCtx.currentTime, 0.02);
       }
 
       async function ensureAudioGraph() {
@@ -1231,7 +1233,7 @@
       }
 
       // =========================================================================
-      // CANVAS RENDERER: Peterson Multi-Band Concentric Disc & Ribbon
+      // CANVAS RENDERER: Peterson Multi-Band Wheel & Linear Multi-Speed Ribbon
       // =========================================================================
       function drawStrobeVisuals(isActive, centsError) {
         const W = wheelCanvas.width;
@@ -1248,16 +1250,12 @@
         const gCol = Math.round(230 * inTuneRatio + 218 * (1 - inTuneRatio));
         const bCol = Math.round(118 * inTuneRatio + 255 * (1 - inTuneRatio));
 
-        // 4 Peterson Bands:
-        // Band 0 (Inner): 12 segments — 1× Coarse sensitivity
-        // Band 1 (Mid-In): 24 segments — 2× Octave sensitivity
-        // Band 2 (Mid-Out): 36 segments — 3× 5th sensitivity
-        // Band 3 (Outer): 48 segments — 4× High Vernier sensitivity
+        // Wheel Bands (1x, 2x, 3x, 4x)
         const rings = [
-          { rIn: 48, rOut: 86, segments: 12, bandIdx: 0, mult: "1×" },
-          { rIn: 94, rOut: 132, segments: 24, bandIdx: 1, mult: "2×" },
-          { rIn: 140, rOut: 178, segments: 36, bandIdx: 2, mult: "3×" },
-          { rIn: 186, rOut: 226, segments: 48, bandIdx: 3, mult: "4×" }
+          { rIn: 48, rOut: 86, segments: 12, bandIdx: 0 },
+          { rIn: 94, rOut: 132, segments: 24, bandIdx: 1 },
+          { rIn: 140, rOut: 178, segments: 36, bandIdx: 2 },
+          { rIn: 186, rOut: 226, segments: 48, bandIdx: 3 }
         ];
 
         rings.forEach(ring => {
@@ -1266,7 +1264,6 @@
           const stepAngle = (2 * Math.PI) / ring.segments;
 
           for (let s = 0; s < ring.segments; s++) {
-            // Radial strobe wedge: starts at -PI/2 (top 12 o'clock viewing crosshair)
             const a0 = s * stepAngle + phase - Math.PI / 2;
             const a1 = a0 + stepAngle * 0.5;
 
@@ -1279,7 +1276,6 @@
             wCtx.fill();
           }
 
-          // Segment borders for authentic slotted strobe disc look
           wCtx.beginPath();
           wCtx.arc(cx, cy, ring.rOut, 0, 2 * Math.PI);
           wCtx.strokeStyle = "#162030";
@@ -1287,7 +1283,7 @@
           wCtx.stroke();
         });
 
-        // Center hub with metallic ring
+        // Center hub
         wCtx.beginPath();
         wCtx.arc(cx, cy, 42, 0, 2 * Math.PI);
         wCtx.fillStyle = "#0c111a";
@@ -1302,15 +1298,14 @@
         wCtx.textBaseline = "middle";
         wCtx.fillText("STROBE", cx, cy);
 
-        // Fixed Top Peterson Viewing Wedge / Crosshair
-        wCtx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+        // Fixed Top Viewing Hairline on Wheel
+        wCtx.strokeStyle = "rgba(255, 255, 255, 0.45)";
         wCtx.lineWidth = 2;
         wCtx.beginPath();
         wCtx.moveTo(cx, 10);
         wCtx.lineTo(cx, 44);
         wCtx.stroke();
 
-        // Subtle side crosshairs
         wCtx.strokeStyle = "rgba(255, 255, 255, 0.15)";
         wCtx.lineWidth = 1;
         wCtx.beginPath();
@@ -1320,35 +1315,46 @@
         wCtx.lineTo(cx, H - 10);
         wCtx.stroke();
 
-        // Multi-Band Linear Ribbon (3 Rows showing 1×, 2×, and 4× Sensitivity)
+        // Multi-Band Linear Ribbon:
+        // 4 Tracks matching the 4 Peterson sensitivity tiers!
+        // Row 0: 1× Coarse  (Moves slowest)
+        // Row 1: 2× Medium  (Moves 2× faster)
+        // Row 2: 3× High    (Moves 3× faster)
+        // Row 3: 4× Vernier (Moves 4× faster for sub-cent alignment)
         const RW = ribbonCanvas.width;
         const RH = ribbonCanvas.height;
         rCtx.clearRect(0, 0, RW, RH);
 
-        const rows = [
-          { y: 4, h: 17, phase: ringPhases[0], spacing: 64, label: "1× COARSE", alpha: isActive ? 0.95 : 0.18 },
-          { y: 24, h: 17, phase: ringPhases[1], spacing: 32, label: "2× MEDIUM", alpha: isActive ? 0.82 : 0.14 },
-          { y: 44, h: 17, phase: ringPhases[3], spacing: 16, label: "4× VERNIER", alpha: isActive ? 0.70 : 0.10 }
+        const ribbonTracks = [
+          { y: 4, h: 22, bandIdx: 0, mult: 1, spacing: 64, label: "1× COARSE", alpha: isActive ? 0.95 : 0.18 },
+          { y: 28, h: 22, bandIdx: 1, mult: 2, spacing: 32, label: "2× MEDIUM", alpha: isActive ? 0.82 : 0.14 },
+          { y: 52, h: 22, bandIdx: 2, mult: 3, spacing: 21.33, label: "3× HIGH", alpha: isActive ? 0.74 : 0.12 },
+          { y: 76, h: 22, bandIdx: 3, mult: 4, spacing: 16, label: "4× VERNIER", alpha: isActive ? 0.70 : 0.10 }
         ];
 
-        rows.forEach(row => {
-          // Normalize pixel offset based on row's individual phase
-          const normShift = ((row.phase % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-          const pxOffset = (normShift / (2 * Math.PI)) * row.spacing;
+        ribbonTracks.forEach(track => {
+          // Normalize pixel displacement according to the band's phase
+          const patternCycleRad = (2 * Math.PI) / (12 * track.mult);
+          const normPhase = ((ringPhases[track.bandIdx] % patternCycleRad) + patternCycleRad) % patternCycleRad;
+          const pxOffset = (normPhase / patternCycleRad) * track.spacing;
 
-          rCtx.fillStyle = `rgba(${rCol}, ${gCol}, ${bCol}, ${row.alpha})`;
-          for (let x = -row.spacing * 2 + pxOffset; x < RW + row.spacing; x += row.spacing) {
-            rCtx.fillRect(x, row.y, row.spacing * 0.5, row.h);
+          rCtx.fillStyle = `rgba(${rCol}, ${gCol}, ${bCol}, ${track.alpha})`;
+          for (let x = -track.spacing * 2 + pxOffset; x < RW + track.spacing; x += track.spacing) {
+            rCtx.fillRect(x, track.y, track.spacing * 0.5, track.h);
           }
 
-          // Subtle label indicator
-          rCtx.fillStyle = "rgba(255, 255, 255, 0.35)";
-          rCtx.font = "9px system-ui, sans-serif";
+          // Track border line
+          rCtx.fillStyle = "#151d2a";
+          rCtx.fillRect(0, track.y + track.h, RW, 2);
+
+          // Track label
+          rCtx.fillStyle = "rgba(255, 255, 255, 0.4)";
+          rCtx.font = "bold 9px system-ui, sans-serif";
           rCtx.textAlign = "left";
-          rCtx.fillText(row.label, 8, row.y + 12);
+          rCtx.fillText(track.label, 8, track.y + 15);
         });
 
-        // Center Optical Alignment Wire on Ribbon
+        // Center Optical Hairline (Zero-Deflection Mark across all 4 tracks)
         rCtx.fillStyle = "#ffffff";
         rCtx.fillRect(RW / 2 - 1.5, 0, 3, RH);
       }
@@ -1456,15 +1462,8 @@
           currentDeltaHz = 0;
         }
 
-        // =========================================================================
-        // PETERSON TIERED SENSITIVITY PHASE ACCUMULATOR
-        // Multipliers m = [1, 2, 3, 4] for each successive concentric band:
-        // Band 0 (1× Fundamental): Rotates slowest (coarse guide)
-        // Band 1 (2× Octave): Rotates at 2× speed
-        // Band 2 (3× 5th): Rotates at 3× speed
-        // Band 3 (4× Vernier): Rotates at 4× speed (catches fractions of a cent)
-        // =========================================================================
-        const baseFundamentalAngularVel = currentDeltaHz * ((2 * Math.PI) / 12); // Base radians/sec for 1 Hz error
+        // True Multiplier-Driven Multi-Band Phase Accumulation (1x, 2x, 3x, 4x)
+        const baseFundamentalAngularVel = currentDeltaHz * ((2 * Math.PI) / 12);
         const multipliers = [1, 2, 3, 4];
 
         for (let i = 0; i < 4; i++) {
