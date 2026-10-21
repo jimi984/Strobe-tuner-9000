@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>StrobeTune Pro — Harmonic Locked Strobe Tuner</title>
+  <title>StrobeTune Pro — Peterson-Style Multi-Band Strobe Tuner</title>
   <style>
     :root {
       --bg: #0a0d12;
@@ -107,7 +107,7 @@
       color: #fff;
     }
 
-    /* Readout Card — Fixed Heights Prevent Any Screen Bounce */
+    /* Readout Card */
     .readout-card {
       background: var(--panel);
       border: 1px solid var(--panel-border);
@@ -291,14 +291,14 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
-    .direction-hint {
+    .strobe-legend {
       width: 100%;
       display: flex;
       justify-content: space-between;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--muted);
       padding: 0 4px;
     }
@@ -312,18 +312,18 @@
     }
 
     canvas#wheelCanvas {
-      width: 236px;
-      height: 236px;
+      width: 250px;
+      height: 250px;
       border-radius: 50%;
-      background: #070a0e;
-      box-shadow: inset 0 0 24px rgba(0,0,0,0.9);
+      background: #06090d;
+      box-shadow: inset 0 0 28px rgba(0,0,0,0.92);
     }
 
     canvas#ribbonCanvas {
       width: 100%;
-      height: 48px;
+      height: 64px;
       border-radius: 8px;
-      background: #070a0e;
+      background: #06090d;
       border: 1px solid #1e2736;
     }
 
@@ -501,11 +501,11 @@
   <div class="app-shell">
     <div id="errorBanner" class="error-banner"></div>
 
-    <!-- Top Header -->
+    <!-- Header -->
     <div class="top-bar">
       <div class="brand">
         <div id="liveDot" class="brand-dot"></div>
-        <span>STROBETUNE PRO <small style="color:var(--muted);font-weight:500;">v3 LOCK</small></span>
+        <span>STROBETUNE PRO <small style="color:var(--muted);font-weight:500;">PETERSON MULTI-BAND</small></span>
       </div>
       <div class="btn-row">
         <button id="synthBtn">Test Tone</button>
@@ -513,13 +513,13 @@
       </div>
     </div>
 
-    <!-- Interactive Test Tone Detune Drawer (Verify Left/Right Strobe Spin!) -->
+    <!-- Test Tone Drawer -->
     <div id="synthPanel" class="synth-panel">
       <div class="control-header">
-        <span>Test Tone Detune (E2 Missing-Fundamental Sim)</span>
-        <strong id="synthDetuneVal">-5.0¢ (Spins Left ◄)</strong>
+        <span>Test Tone Detune (E2 Harmonic Simulation)</span>
+        <strong id="synthDetuneVal">-3.0¢ (Spins Left ◄)</strong>
       </div>
-      <input id="synthDetuneSlider" type="range" min="-25" max="25" step="0.5" value="-5" />
+      <input id="synthDetuneSlider" type="range" min="-20" max="20" step="0.5" value="-3" />
     </div>
 
     <!-- Digital Pitch Readout -->
@@ -563,34 +563,35 @@
       </div>
     </div>
 
-    <!-- Harmonic Strobe Display -->
+    <!-- Multi-Band Peterson Strobe Display -->
     <div class="strobe-card">
-      <div class="direction-hint">
-        <span>◄ Counter-Clockwise / Left = FLAT (♭)</span>
-        <span>Clockwise / Right = SHARP (♯) ►</span>
+      <div class="strobe-legend">
+        <span>◄ FLAT (CCW / Left)</span>
+        <span>Inner = 1× Coarse • Outer = 4× Fine</span>
+        <span>SHARP (CW / Right) ►</span>
       </div>
 
       <div class="canvas-row">
-        <canvas id="wheelCanvas" width="472" height="472"></canvas>
-        <canvas id="ribbonCanvas" width="800" height="96"></canvas>
+        <canvas id="wheelCanvas" width="500" height="500"></canvas>
+        <canvas id="ribbonCanvas" width="800" height="128"></canvas>
       </div>
 
-      <!-- Real-Time Harmonic Energy Bars (1f0, 2f0, 3f0, 4f0) -->
+      <!-- Real-Time Harmonic Energy Bars -->
       <div class="harmonic-bars">
         <div class="h-item">
-          <div class="h-label"><span>1× Fund</span><span id="h1Txt">0%</span></div>
+          <div class="h-label"><span>1× Coarse</span><span id="h1Txt">0%</span></div>
           <div class="h-meter"><div id="h1Bar" class="h-fill"></div></div>
         </div>
         <div class="h-item">
-          <div class="h-label"><span>2× Oct</span><span id="h2Txt">0%</span></div>
+          <div class="h-label"><span>2× Medium</span><span id="h2Txt">0%</span></div>
           <div class="h-meter"><div id="h2Bar" class="h-fill"></div></div>
         </div>
         <div class="h-item">
-          <div class="h-label"><span>3× 5th</span><span id="h3Txt">0%</span></div>
+          <div class="h-label"><span>3× High</span><span id="h3Txt">0%</span></div>
           <div class="h-meter"><div id="h3Bar" class="h-fill"></div></div>
         </div>
         <div class="h-item">
-          <div class="h-label"><span>4× 2Oct</span><span id="h4Txt">0%</span></div>
+          <div class="h-label"><span>4× Vernier</span><span id="h4Txt">0%</span></div>
           <div class="h-meter"><div id="h4Bar" class="h-fill"></div></div>
         </div>
       </div>
@@ -680,7 +681,7 @@
         custom: ["D2", "A2", "D3", "G3", "A3", "D4"]
       };
 
-      // Audio Graph State
+      // Audio Graph
       let audioCtx = null;
       let micStream = null;
       let micSource = null;
@@ -690,20 +691,20 @@
       let analyser = null;
       let timeBuffer = null;
 
-      // Test Tone Synth State
+      // Synth
       let synthActive = false;
       let synthOscs = [];
       let synthGain = null;
-      let synthDetuneCents = -5.0;
+      let synthDetuneCents = -3.0;
 
       // Tuner Settings
       let a4Hz = 440;
       let gateDb = -46;
       let currentPreset = "guitar_std";
       let manualMidiLock = null;
-      let smoothingLevel = 3; // 1=Fast, 2=Med, 3=High Stability
+      let smoothingLevel = 3;
 
-      // Pitch Lock & Stabilization State
+      // Pitch Tracker
       let lockedMidi = null;
       let candidateMidi = null;
       let candidateFrames = 0;
@@ -713,11 +714,14 @@
       let smoothedCents = 0;
       let holdFramesRemaining = 0;
 
-      // Strobe Phase Accumulators (Rings 1..4)
-      // Strictly driven by deltaF = f_measured - f_target
+      // True Peterson Multi-Band Phase Accumulators:
+      // Ring 0: 1× Fundamental (Coarse)
+      // Ring 1: 2× 1st Octave  (Medium)
+      // Ring 2: 3× 5th / Oct+5th (High)
+      // Ring 3: 4× 2nd Octave (Fine / Vernier)
       const ringPhases = [0, 0, 0, 0];
       const harmonicStrengths = [0.25, 0.25, 0.25, 0.25];
-      let currentDeltaHz = 0; // Negative = Flat (Left/CCW), Positive = Sharp (Right/CW)
+      let currentDeltaHz = 0;
 
       // DOM Elements
       const micBtn = document.getElementById("micBtn");
@@ -758,7 +762,6 @@
       const ribbonCanvas = document.getElementById("ribbonCanvas");
       const rCtx = ribbonCanvas.getContext("2d");
 
-      // Helpers: MIDI <-> Frequency
       function noteStrToMidi(str) {
         const m = /^([A-G])(#?)(-?\d+)$/i.exec(str.trim());
         if (!m) return null;
@@ -943,7 +946,6 @@
         synthGain.gain.value = 0.15;
 
         const baseE2 = midiToFreq(40) * Math.pow(2, synthDetuneCents / 1200);
-        // Simulate phone mic: almost no fundamental (10%), strong 2nd (90%) & 3rd (65%) harmonics
         const amps = [0.10, 0.90, 0.65, 0.40];
         synthOscs = amps.map((amp, i) => {
           const osc = audioCtx.createOscillator();
@@ -981,9 +983,6 @@
         if (!micStream) liveDot.classList.remove("live");
       }
 
-      // =========================================================================
-      // HELPER: Normalized Autocorrelation at a Specific Lag (with Fractional Interpolation)
-      // =========================================================================
       function corrAtIntLag(buf, offset, N, tau) {
         if (tau < 2 || tau >= N - 2) return 0;
         let acf = 0;
@@ -998,7 +997,6 @@
         return div > 1e-9 ? (2 * acf) / div : 0;
       }
 
-      // Refines a local peak around expectedTau and returns { refinedTau, corr }
       function refinePeakNearLag(buf, offset, N, centerTau, searchRadius) {
         const minT = Math.max(3, Math.floor(centerTau - searchRadius));
         const maxT = Math.min(N - 4, Math.ceil(centerTau + searchRadius));
@@ -1016,7 +1014,6 @@
 
         if (bestVal < 0.25) return null;
 
-        // Parabolic sub-sample interpolation using stride-1 around bestTau
         const corrExact = (tau) => {
           let acf = 0, div = 0;
           const lim = N - tau;
@@ -1045,22 +1042,15 @@
         };
       }
 
-      // =========================================================================
-      // STAGE 1 & 2: Harmonic-Restored Pitch & String Detector
-      // =========================================================================
       function analyzeAudioFrame(buf, sampleRate) {
-        const N = 3072; // Long window (~70ms) captures multiple periods of low B0/E1/E2
+        const N = 3072;
         const offset = buf.length - N;
 
-        // Step A: Determine which Target Note is being played
         let activeTargetMidi = manualMidiLock;
         const presetList = PRESETS[currentPreset];
 
         if (activeTargetMidi === null) {
           if (presetList) {
-            // In Instrument Preset Mode: Evaluate each string's Harmonic Period Comb!
-            // For a candidate string with fundamental period T0, both T0 and 2*T0 have high correlation,
-            // AND we check that T0/2 isn't falsely beating a lower string.
             let bestMidi = null;
             let bestCombScore = -1;
 
@@ -1069,7 +1059,6 @@
               if (midi === null) return;
               const f0 = midiToFreq(midi);
               const expectedTau = sampleRate / f0;
-              // Allow +/- 18% frequency pull around each string when searching
               const radius = Math.max(3, Math.round(expectedTau * 0.14));
               const peak1 = refinePeakNearLag(buf, offset, N, expectedTau, radius);
               const peak2 = refinePeakNearLag(buf, offset, N, expectedTau * 0.5, Math.max(2, Math.round(radius * 0.5)));
@@ -1077,7 +1066,6 @@
               const c1 = peak1 ? peak1.corr : 0;
               const c2 = peak2 ? peak2.corr : 0;
 
-              // Check if sub-octave (2 * expectedTau) has equal correlation; if so, this candidate is a 2nd harmonic of a lower string!
               let subPenalty = 0;
               if (expectedTau * 2 < N - 8) {
                 const subPeak = refinePeakNearLag(buf, offset, N, expectedTau * 2, radius * 2);
@@ -1086,7 +1074,6 @@
                 }
               }
 
-              // Give hysteresis bonus to currently locked string so it never chatters
               const hysteresisBonus = (lockedMidi === midi) ? 0.15 : 0;
               const score = c1 * 0.75 + c2 * 0.25 - subPenalty + hysteresisBonus;
 
@@ -1098,7 +1085,6 @@
 
             if (bestCombScore < 0.32) return null;
 
-            // Apply frame-count hysteresis before switching strings
             if (lockedMidi === null) {
               lockedMidi = bestMidi;
               renderStringPills();
@@ -1120,7 +1106,6 @@
             }
             activeTargetMidi = lockedMidi;
           } else {
-            // Chromatic Mode: Global McLeod NSDF scan
             const minTau = Math.floor(sampleRate / 1050);
             const maxTau = Math.min(N - 4, Math.ceil(sampleRate / 35));
             let inPos = false, pTau = 0, pVal = -1;
@@ -1142,7 +1127,6 @@
             peaks.forEach(p => { if (p.val > maxV) maxV = p.val; });
             let chosen = peaks.find(p => p.val >= 0.85 * maxV) || peaks[0];
 
-            // Subharmonic check for missing fundamental
             const sub = peaks.find(p => Math.abs(p.tau - chosen.tau * 2) <= 4);
             if (sub && sub.val >= chosen.val * 0.88) chosen = sub;
 
@@ -1173,13 +1157,9 @@
 
         if (activeTargetMidi === null) return null;
 
-        // Step B: High-Precision Multi-Harmonic Period Measurement
-        // Now that activeTargetMidi is known, we measure the exact fundamental frequency using
-        // T0 (fundamental lag), T0/2 (2nd harmonic lag), and T0/3 (3rd harmonic lag) weighted by harmonic energy!
         const targetFreq = midiToFreq(activeTargetMidi);
         const expectedTau0 = sampleRate / targetFreq;
 
-        // First measure actual DFT harmonic magnitudes (1f0, 2f0, 3f0, 4f0) inside this buffer
         const mags = [0, 0, 0, 0];
         let magSum = 1e-9;
         const dftLen = 2048;
@@ -1203,7 +1183,6 @@
           harmonicStrengths[m] = 0.75 * harmonicStrengths[m] + 0.25 * (mags[m] / magSum);
         }
 
-        // Measure sub-sample period at T0 (all harmonics), T0/2 (even harmonics), and T0/3 (3rd harmonic)
         const searchRad0 = Math.max(4, expectedTau0 * 0.12);
         const p1 = refinePeakNearLag(buf, offset, N, expectedTau0, searchRad0);
         const p2 = refinePeakNearLag(buf, offset, N, expectedTau0 / 2, searchRad0 / 2);
@@ -1222,9 +1201,7 @@
         }
 
         if (p2 && p2.corr > 0.45) {
-          // Period T0/2 gives 2 * f0, so divide by 2 to get fundamental f0
           const fFromH2 = (sampleRate / p2.refinedTau) * 0.5;
-          // Only fuse if consistent within +-120 cents of target
           if (Math.abs(1200 * Math.log2(fFromH2 / targetFreq)) < 120) {
             const w2 = p2.corr * harmonicStrengths[1] * 1.2;
             fSum += fFromH2 * w2;
@@ -1234,7 +1211,6 @@
         }
 
         if (p3 && p3.corr > 0.45) {
-          // Period T0/3 gives 3 * f0, so divide by 3 to get fundamental f0
           const fFromH3 = (sampleRate / p3.refinedTau) / 3.0;
           if (Math.abs(1200 * Math.log2(fFromH3 / targetFreq)) < 120) {
             const w3 = p3.corr * harmonicStrengths[2] * 1.1;
@@ -1255,7 +1231,7 @@
       }
 
       // =========================================================================
-      // CANVAS RENDERER: True Bidirectional Strobe Wheel & Ribbon
+      // CANVAS RENDERER: Peterson Multi-Band Concentric Disc & Ribbon
       // =========================================================================
       function drawStrobeVisuals(isActive, centsError) {
         const W = wheelCanvas.width;
@@ -1272,21 +1248,25 @@
         const gCol = Math.round(230 * inTuneRatio + 218 * (1 - inTuneRatio));
         const bCol = Math.round(118 * inTuneRatio + 255 * (1 - inTuneRatio));
 
+        // 4 Peterson Bands:
+        // Band 0 (Inner): 12 segments — 1× Coarse sensitivity
+        // Band 1 (Mid-In): 24 segments — 2× Octave sensitivity
+        // Band 2 (Mid-Out): 36 segments — 3× 5th sensitivity
+        // Band 3 (Outer): 48 segments — 4× High Vernier sensitivity
         const rings = [
-          { rIn: 46, rOut: 82, segments: 12, mIdx: 0 },
-          { rIn: 90, rOut: 126, segments: 24, mIdx: 1 },
-          { rIn: 134, rOut: 170, segments: 36, mIdx: 2 },
-          { rIn: 178, rOut: 214, segments: 48, mIdx: 3 }
+          { rIn: 48, rOut: 86, segments: 12, bandIdx: 0, mult: "1×" },
+          { rIn: 94, rOut: 132, segments: 24, bandIdx: 1, mult: "2×" },
+          { rIn: 140, rOut: 178, segments: 36, bandIdx: 2, mult: "3×" },
+          { rIn: 186, rOut: 226, segments: 48, bandIdx: 3, mult: "4×" }
         ];
 
         rings.forEach(ring => {
-          const phase = ringPhases[ring.mIdx];
-          const alpha = isActive ? Math.max(0.32, Math.min(0.98, harmonicStrengths[ring.mIdx] * 2.4)) : 0.14;
+          const phase = ringPhases[ring.bandIdx];
+          const alpha = isActive ? Math.max(0.32, Math.min(0.98, harmonicStrengths[ring.bandIdx] * 2.4)) : 0.14;
           const stepAngle = (2 * Math.PI) / ring.segments;
 
           for (let s = 0; s < ring.segments; s++) {
-            // Note: In HTML5 Canvas, positive angle is CLOCKWISE (Right at top of wheel)
-            // and negative angle is COUNTER-CLOCKWISE (Left at top of wheel).
+            // Radial strobe wedge: starts at -PI/2 (top 12 o'clock viewing crosshair)
             const a0 = s * stepAngle + phase - Math.PI / 2;
             const a1 = a0 + stepAngle * 0.5;
 
@@ -1299,6 +1279,7 @@
             wCtx.fill();
           }
 
+          // Segment borders for authentic slotted strobe disc look
           wCtx.beginPath();
           wCtx.arc(cx, cy, ring.rOut, 0, 2 * Math.PI);
           wCtx.strokeStyle = "#162030";
@@ -1306,45 +1287,74 @@
           wCtx.stroke();
         });
 
-        // Static Reference Crosshairs
-        wCtx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+        // Center hub with metallic ring
+        wCtx.beginPath();
+        wCtx.arc(cx, cy, 42, 0, 2 * Math.PI);
+        wCtx.fillStyle = "#0c111a";
+        wCtx.fill();
+        wCtx.strokeStyle = "#25344d";
+        wCtx.lineWidth = 3;
+        wCtx.stroke();
+
+        wCtx.fillStyle = "#6d7a8d";
+        wCtx.font = "bold 13px system-ui, sans-serif";
+        wCtx.textAlign = "center";
+        wCtx.textBaseline = "middle";
+        wCtx.fillText("STROBE", cx, cy);
+
+        // Fixed Top Peterson Viewing Wedge / Crosshair
+        wCtx.strokeStyle = "rgba(255, 255, 255, 0.4)";
         wCtx.lineWidth = 2;
         wCtx.beginPath();
         wCtx.moveTo(cx, 10);
-        wCtx.lineTo(cx, H - 10);
-        wCtx.moveTo(10, cy);
-        wCtx.lineTo(W - 10, cy);
+        wCtx.lineTo(cx, 44);
         wCtx.stroke();
 
-        // Linear Strobe Ribbon: Negative phase moves LEFT (Flat), Positive phase moves RIGHT (Sharp)
+        // Subtle side crosshairs
+        wCtx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+        wCtx.lineWidth = 1;
+        wCtx.beginPath();
+        wCtx.moveTo(cx - 35, cy);
+        wCtx.lineTo(cx + 35, cy);
+        wCtx.moveTo(cx, cy + 44);
+        wCtx.lineTo(cx, H - 10);
+        wCtx.stroke();
+
+        // Multi-Band Linear Ribbon (3 Rows showing 1×, 2×, and 4× Sensitivity)
         const RW = ribbonCanvas.width;
         const RH = ribbonCanvas.height;
         rCtx.clearRect(0, 0, RW, RH);
 
-        const baseSpacing = 52;
         const rows = [
-          { y: 5, h: 38, phase: ringPhases[0], spacing: baseSpacing, alpha: isActive ? 0.92 : 0.15 },
-          { y: 51, h: 38, phase: ringPhases[1] * 2, spacing: baseSpacing / 2, alpha: isActive ? 0.75 : 0.12 }
+          { y: 4, h: 17, phase: ringPhases[0], spacing: 64, label: "1× COARSE", alpha: isActive ? 0.95 : 0.18 },
+          { y: 24, h: 17, phase: ringPhases[1], spacing: 32, label: "2× MEDIUM", alpha: isActive ? 0.82 : 0.14 },
+          { y: 44, h: 17, phase: ringPhases[3], spacing: 16, label: "4× VERNIER", alpha: isActive ? 0.70 : 0.10 }
         ];
 
         rows.forEach(row => {
-          // Map 1 pattern cycle to (2*PI / 12) radians so linear ribbon matches top of wheel
-          const patternCycleRad = (2 * Math.PI) / 12;
-          const normShift = ((row.phase % patternCycleRad) + patternCycleRad) % patternCycleRad;
-          const pxOffset = (normShift / patternCycleRad) * row.spacing;
+          // Normalize pixel offset based on row's individual phase
+          const normShift = ((row.phase % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+          const pxOffset = (normShift / (2 * Math.PI)) * row.spacing;
 
           rCtx.fillStyle = `rgba(${rCol}, ${gCol}, ${bCol}, ${row.alpha})`;
           for (let x = -row.spacing * 2 + pxOffset; x < RW + row.spacing; x += row.spacing) {
             rCtx.fillRect(x, row.y, row.spacing * 0.5, row.h);
           }
+
+          // Subtle label indicator
+          rCtx.fillStyle = "rgba(255, 255, 255, 0.35)";
+          rCtx.font = "9px system-ui, sans-serif";
+          rCtx.textAlign = "left";
+          rCtx.fillText(row.label, 8, row.y + 12);
         });
 
+        // Center Optical Alignment Wire on Ribbon
         rCtx.fillStyle = "#ffffff";
         rCtx.fillRect(RW / 2 - 1.5, 0, 3, RH);
       }
 
       // =========================================================================
-      // MAIN REAL-TIME LOOP
+      // MAIN DSP & MULTI-BAND ACCUMULATION LOOP
       // =========================================================================
       let lastTime = performance.now();
 
@@ -1357,7 +1367,6 @@
         if (analyser && (micStream || synthActive)) {
           analyser.getFloatTimeDomainData(timeBuffer);
 
-          // RMS Level & Gate check
           let sumSq = 0;
           for (let i = 0; i < timeBuffer.length; i++) {
             sumSq += timeBuffer[i] * timeBuffer[i];
@@ -1373,15 +1382,13 @@
 
             if (res) {
               isTracking = true;
-              holdFramesRemaining = 12; // Hold brief dropouts smoothly
+              holdFramesRemaining = 12;
 
-              // 1. Median filter strips transient pluck spikes
               pitchMedianWindow.push(res.measuredFreq);
               if (pitchMedianWindow.length > MEDIAN_SIZE) pitchMedianWindow.shift();
               const sorted = [...pitchMedianWindow].sort((a, b) => a - b);
               const medianHz = sorted[Math.floor(sorted.length / 2)];
 
-              // 2. Heavy adaptive EMA filter for rock-solid reading
               const alphaMap = { 1: 0.28, 2: 0.14, 3: 0.07 };
               const alpha = alphaMap[smoothingLevel] || 0.10;
 
@@ -1391,12 +1398,10 @@
                 smoothedFreq = (1 - alpha) * smoothedFreq + alpha * medianHz;
               }
 
-              // 3. Exact Frequency Error (Strictly negative when flat, positive when sharp!)
               currentDeltaHz = smoothedFreq - res.targetFreq;
               const rawCents = 1200 * Math.log2(smoothedFreq / res.targetFreq);
               smoothedCents = (1 - alpha) * smoothedCents + alpha * rawCents;
 
-              // Update Digital Readout
               const parts = midiToParts(res.targetMidi);
               noteLetterEl.textContent = parts.letter;
               noteAccEl.textContent = parts.acc;
@@ -1441,7 +1446,7 @@
               holdFramesRemaining--;
               isTracking = true;
             } else {
-              currentDeltaHz *= 0.85; // Smooth coast to stop when silent
+              currentDeltaHz *= 0.85;
               modeBadge.textContent = "GATE CLOSED";
               modeBadge.className = "badge";
             }
@@ -1451,12 +1456,20 @@
           currentDeltaHz = 0;
         }
 
-        // Advance Strobe Phases Strictly by Signed Frequency Error (currentDeltaHz)
-        // Visual angular scale: 1 Hz error = (2*PI / 12) rad/sec (1 pattern segment per second per Hz)
-        const segmentAngle = (2 * Math.PI) / 12;
-        for (let m = 0; m < 4; m++) {
-          // Ring m has (m+1)*12 segments, so the same angle shift advances (m+1)x more segments!
-          ringPhases[m] = (ringPhases[m] + currentDeltaHz * segmentAngle * dt) % (2 * Math.PI);
+        // =========================================================================
+        // PETERSON TIERED SENSITIVITY PHASE ACCUMULATOR
+        // Multipliers m = [1, 2, 3, 4] for each successive concentric band:
+        // Band 0 (1× Fundamental): Rotates slowest (coarse guide)
+        // Band 1 (2× Octave): Rotates at 2× speed
+        // Band 2 (3× 5th): Rotates at 3× speed
+        // Band 3 (4× Vernier): Rotates at 4× speed (catches fractions of a cent)
+        // =========================================================================
+        const baseFundamentalAngularVel = currentDeltaHz * ((2 * Math.PI) / 12); // Base radians/sec for 1 Hz error
+        const multipliers = [1, 2, 3, 4];
+
+        for (let i = 0; i < 4; i++) {
+          const bandVelocity = baseFundamentalAngularVel * multipliers[i];
+          ringPhases[i] = (ringPhases[i] + bandVelocity * dt) % (2 * Math.PI);
         }
 
         drawStrobeVisuals(isTracking, smoothedCents);
