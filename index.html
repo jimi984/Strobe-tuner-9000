@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>StrobeTune Pro — Harmonic Heterodyne Strobe Tuner</title>
+  <title>StrobeTune Pro — Harmonic Locked Strobe Tuner</title>
   <style>
     :root {
       --bg: #0a0d12;
@@ -61,8 +61,8 @@
       align-items: center;
       gap: 8px;
       font-weight: 700;
-      font-size: 1rem;
-      letter-spacing: 0.5px;
+      font-size: 0.95rem;
+      letter-spacing: 0.4px;
     }
 
     .brand-dot {
@@ -70,7 +70,6 @@
       height: 10px;
       border-radius: 50%;
       background: var(--muted);
-      box-shadow: 0 0 8px transparent;
       transition: background 0.2s, box-shadow 0.2s;
     }
 
@@ -81,7 +80,7 @@
 
     .btn-row {
       display: flex;
-      gap: 8px;
+      gap: 6px;
     }
 
     button {
@@ -89,8 +88,8 @@
       color: var(--text);
       border: 1px solid #2e3b52;
       border-radius: 8px;
-      padding: 7px 12px;
-      font-size: 0.82rem;
+      padding: 7px 11px;
+      font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.15s;
@@ -108,7 +107,7 @@
       color: #fff;
     }
 
-    /* Main Readout Card — Locked Heights to Prevent Layout Shift */
+    /* Readout Card — Fixed Heights Prevent Any Screen Bounce */
     .readout-card {
       background: var(--panel);
       border: 1px solid var(--panel-border);
@@ -132,23 +131,33 @@
       text-transform: uppercase;
       padding: 3px 8px;
       border-radius: 6px;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.5px;
       background: #1b2230;
       color: var(--muted);
       font-variant-numeric: tabular-nums;
     }
 
     .badge.locked {
-      background: rgba(0, 230, 118, 0.15);
+      background: rgba(0, 230, 118, 0.16);
       color: var(--in-tune);
-      border: 1px solid rgba(0, 230, 118, 0.35);
+      border: 1px solid rgba(0, 230, 118, 0.4);
+    }
+
+    .badge.flat {
+      background: rgba(0, 229, 255, 0.14);
+      color: var(--accent);
+    }
+
+    .badge.sharp {
+      background: rgba(255, 171, 0, 0.16);
+      color: var(--warn);
     }
 
     .note-hero {
       display: grid;
       grid-template-columns: 1fr auto 1fr;
       align-items: center;
-      height: 84px;
+      height: 82px;
     }
 
     .freq-box {
@@ -170,7 +179,7 @@
     }
 
     .freq-val {
-      font-size: 1.05rem;
+      font-size: 1.02rem;
       font-weight: 700;
       color: var(--text);
     }
@@ -214,7 +223,7 @@
       line-height: 1;
     }
 
-    /* Cents Ruler & Needle */
+    /* Cents Scale & Needle */
     .cents-wrap {
       display: flex;
       flex-direction: column;
@@ -228,17 +237,17 @@
       font-size: 0.72rem;
       color: var(--muted);
       font-variant-numeric: tabular-nums;
-      height: 20px;
+      height: 22px;
     }
 
     .cents-pill {
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       font-weight: 700;
-      padding: 2px 10px;
+      padding: 2px 12px;
       border-radius: 999px;
       background: #1a2230;
       color: var(--text);
-      min-width: 78px;
+      min-width: 86px;
       text-align: center;
     }
 
@@ -259,22 +268,21 @@
       width: 2px;
       background: var(--in-tune);
       transform: translateX(-50%);
-      opacity: 0.7;
+      opacity: 0.8;
     }
 
-    .needle-Readout {
+    .needle-readout {
       position: absolute;
       top: 1px;
       bottom: 1px;
-      width: 6px;
-      border-radius: 3px;
+      width: 8px;
+      border-radius: 4px;
       background: var(--accent);
       left: 50%;
       transform: translateX(-50%);
-      transition: background 0.1s;
     }
 
-    /* Strobe Canvas Container */
+    /* Strobe Display Card */
     .strobe-card {
       background: var(--panel);
       border: 1px solid var(--panel-border);
@@ -286,6 +294,15 @@
       gap: 10px;
     }
 
+    .direction-hint {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--muted);
+      padding: 0 4px;
+    }
+
     .canvas-row {
       display: flex;
       flex-direction: column;
@@ -295,16 +312,16 @@
     }
 
     canvas#wheelCanvas {
-      width: 240px;
-      height: 240px;
+      width: 236px;
+      height: 236px;
       border-radius: 50%;
       background: #070a0e;
-      box-shadow: inset 0 0 24px rgba(0,0,0,0.85);
+      box-shadow: inset 0 0 24px rgba(0,0,0,0.9);
     }
 
     canvas#ribbonCanvas {
       width: 100%;
-      height: 46px;
+      height: 48px;
       border-radius: 8px;
       background: #070a0e;
       border: 1px solid #1e2736;
@@ -395,7 +412,6 @@
       cursor: pointer;
     }
 
-    /* String Target Pills */
     .string-pills {
       display: flex;
       flex-wrap: wrap;
@@ -429,7 +445,6 @@
       color: var(--warn);
     }
 
-    /* Level & Gate Bar */
     .level-bar-wrap {
       position: relative;
       height: 10px;
@@ -460,6 +475,16 @@
       gap: 10px;
     }
 
+    .synth-panel {
+      display: none;
+      background: #0d131d;
+      border: 1px solid #233147;
+      border-radius: 10px;
+      padding: 8px 10px;
+      flex-direction: column;
+      gap: 6px;
+    }
+
     .error-banner {
       display: none;
       background: rgba(255, 82, 82, 0.15);
@@ -480,7 +505,7 @@
     <div class="top-bar">
       <div class="brand">
         <div id="liveDot" class="brand-dot"></div>
-        <span>STROBETUNE PRO <small style="color:var(--muted);font-weight:500;">DSP v2</small></span>
+        <span>STROBETUNE PRO <small style="color:var(--muted);font-weight:500;">v3 LOCK</small></span>
       </div>
       <div class="btn-row">
         <button id="synthBtn">Test Tone</button>
@@ -488,12 +513,21 @@
       </div>
     </div>
 
+    <!-- Interactive Test Tone Detune Drawer (Verify Left/Right Strobe Spin!) -->
+    <div id="synthPanel" class="synth-panel">
+      <div class="control-header">
+        <span>Test Tone Detune (E2 Missing-Fundamental Sim)</span>
+        <strong id="synthDetuneVal">-5.0¢ (Spins Left ◄)</strong>
+      </div>
+      <input id="synthDetuneSlider" type="range" min="-25" max="25" step="0.5" value="-5" />
+    </div>
+
     <!-- Digital Pitch Readout -->
     <div class="readout-card">
       <div class="status-row">
         <span id="modeBadge" class="badge">STANDBY</span>
         <span id="stringBadge" class="badge">AUTO TARGET</span>
-        <span id="confidenceBadge" class="badge">CLARITY: --%</span>
+        <span id="confidenceBadge" class="badge">LOCK: --%</span>
       </div>
 
       <div class="note-hero">
@@ -518,25 +552,30 @@
 
       <div class="cents-wrap">
         <div class="cents-scale">
-          <span>-50¢ ♭</span>
+          <span>◄ -50¢ FLAT (CCW)</span>
           <span id="centsPill" class="cents-pill">0.0¢</span>
-          <span>♯ +50¢</span>
+          <span>SHARP (CW) +50¢ ►</span>
         </div>
         <div class="needle-track">
           <div class="needle-center-tick"></div>
-          <div id="needleEl" class="needle-Readout"></div>
+          <div id="needleEl" class="needle-readout"></div>
         </div>
       </div>
     </div>
 
-    <!-- True Quadrature Harmonic Strobe Display -->
+    <!-- Harmonic Strobe Display -->
     <div class="strobe-card">
-      <div class="canvas-row">
-        <canvas id="wheelCanvas" width="480" height="480"></canvas>
-        <canvas id="ribbonCanvas" width="800" height="92"></canvas>
+      <div class="direction-hint">
+        <span>◄ Counter-Clockwise / Left = FLAT (♭)</span>
+        <span>Clockwise / Right = SHARP (♯) ►</span>
       </div>
 
-      <!-- Real-Time Harmonic Energy Indicators (1f0, 2f0, 3f0, 4f0) -->
+      <div class="canvas-row">
+        <canvas id="wheelCanvas" width="472" height="472"></canvas>
+        <canvas id="ribbonCanvas" width="800" height="96"></canvas>
+      </div>
+
+      <!-- Real-Time Harmonic Energy Bars (1f0, 2f0, 3f0, 4f0) -->
       <div class="harmonic-bars">
         <div class="h-item">
           <div class="h-label"><span>1× Fund</span><span id="h1Txt">0%</span></div>
@@ -557,12 +596,12 @@
       </div>
     </div>
 
-    <!-- Tuning Presets & Audio Conditioning Controls -->
+    <!-- Controls Card -->
     <div class="controls-card">
       <div class="control-group">
         <div class="control-header">
           <span>Instrument & Tuning Preset</span>
-          <strong id="lockHint">Tap string to lock / unlock</strong>
+          <strong>Tap string pill to manual-lock</strong>
         </div>
         <select id="presetSelect">
           <option value="chromatic">Chromatic (All 12 Notes)</option>
@@ -571,7 +610,7 @@
           <option value="guitar_open_g">Guitar — Open G (D2 G2 D3 G3 B3 D4)</option>
           <option value="bass_4">Bass 4-String — Standard (E1 A1 D2 G2)</option>
           <option value="bass_5">Bass 5-String — Standard (B0 E1 A1 D2 G2)</option>
-          <option value="custom">Custom Tuning (Edit Notes Below)</option>
+          <option value="custom">Custom Tuning (Edit Below)</option>
         </select>
       </div>
 
@@ -588,38 +627,38 @@
       <div class="grid-2">
         <div class="control-group">
           <div class="control-header">
-            <span>Mic Preamp Gain</span>
-            <strong id="gainVal">3.0×</strong>
+            <span>Mic Sensitivity</span>
+            <strong id="gainVal">3.5×</strong>
           </div>
-          <input id="gainSlider" type="range" min="0.5" max="10" step="0.1" value="3.0" />
+          <input id="gainSlider" type="range" min="0.5" max="12" step="0.1" value="3.5" />
         </div>
 
         <div class="control-group">
           <div class="control-header">
             <span>Noise Gate</span>
-            <strong id="gateVal">-45 dB</strong>
+            <strong id="gateVal">-46 dB</strong>
           </div>
-          <input id="gateSlider" type="range" min="-65" max="-15" step="1" value="-45" />
+          <input id="gateSlider" type="range" min="-65" max="-15" step="1" value="-46" />
         </div>
       </div>
 
       <div class="level-bar-wrap">
         <div id="levelFill" class="level-fill"></div>
-        <div id="gateMarker" class="gate-marker" style="left: 40%;"></div>
+        <div id="gateMarker" class="gate-marker" style="left: 30%;"></div>
       </div>
 
       <div class="grid-2">
         <div class="control-group">
           <div class="control-header">
-            <span>Phase Smoothing</span>
-            <strong id="smoothVal">Medium</strong>
+            <span>Strobe Damping</span>
+            <strong id="smoothVal">High Stability</strong>
           </div>
-          <input id="smoothSlider" type="range" min="1" max="3" step="1" value="2" />
+          <input id="smoothSlider" type="range" min="1" max="3" step="1" value="3" />
         </div>
 
         <div class="control-group">
           <div class="control-header">
-            <span>A4 Calibration</span>
+            <span>A4 Reference</span>
             <strong id="a4Val">440 Hz</strong>
           </div>
           <input id="a4Slider" type="range" min="415" max="466" step="1" value="440" />
@@ -641,7 +680,7 @@
         custom: ["D2", "A2", "D3", "G3", "A3", "D4"]
       };
 
-      // State
+      // Audio Graph State
       let audioCtx = null;
       let micStream = null;
       let micSource = null;
@@ -650,41 +689,42 @@
       let lpFilter = null;
       let analyser = null;
       let timeBuffer = null;
-      let hannWindow = null;
 
-      // Test Synth
+      // Test Tone Synth State
       let synthActive = false;
       let synthOscs = [];
       let synthGain = null;
+      let synthDetuneCents = -5.0;
 
-      // Parameters
+      // Tuner Settings
       let a4Hz = 440;
-      let gateDb = -45;
+      let gateDb = -46;
       let currentPreset = "guitar_std";
-      let manualMidiLock = null; // null = auto nearest string
-      let smoothingMode = 2; // 1=Fast, 2=Med, 3=High
+      let manualMidiLock = null;
+      let smoothingLevel = 3; // 1=Fast, 2=Med, 3=High Stability
 
-      // Pitch & Hysteresis Tracker
+      // Pitch Lock & Stabilization State
       let lockedMidi = null;
-      let switchCandidateMidi = null;
-      let switchCounter = 0;
-      const medianBuf = [];
-      const MEDIAN_LEN = 5;
+      let candidateMidi = null;
+      let candidateFrames = 0;
+      const pitchMedianWindow = [];
+      const MEDIAN_SIZE = 7;
+      let smoothedFreq = 0;
+      let smoothedCents = 0;
+      let holdFramesRemaining = 0;
 
-      // 1D Kalman Filter State for Frequency
-      let kalmanFreq = 0;
-      let kalmanP = 1.0;
-
-      // Direct Quadrature Harmonic Strobe Phases (Rings 1..4)
+      // Strobe Phase Accumulators (Rings 1..4)
+      // Strictly driven by deltaF = f_measured - f_target
       const ringPhases = [0, 0, 0, 0];
-      const prevRawHarmonicPhase = [null, null, null, null];
-      const ringAngularVel = [0, 0, 0, 0];
-      const harmonicAmps = [0.25, 0.25, 0.25, 0.25];
-      let sampleFrameCounter = 0;
+      const harmonicStrengths = [0.25, 0.25, 0.25, 0.25];
+      let currentDeltaHz = 0; // Negative = Flat (Left/CCW), Positive = Sharp (Right/CW)
 
       // DOM Elements
       const micBtn = document.getElementById("micBtn");
       const synthBtn = document.getElementById("synthBtn");
+      const synthPanel = document.getElementById("synthPanel");
+      const synthDetuneSlider = document.getElementById("synthDetuneSlider");
+      const synthDetuneVal = document.getElementById("synthDetuneVal");
       const liveDot = document.getElementById("liveDot");
       const errorBanner = document.getElementById("errorBanner");
       const modeBadge = document.getElementById("modeBadge");
@@ -718,7 +758,7 @@
       const ribbonCanvas = document.getElementById("ribbonCanvas");
       const rCtx = ribbonCanvas.getContext("2d");
 
-      // Utilities: Note <-> MIDI <-> Frequency
+      // Helpers: MIDI <-> Frequency
       function noteStrToMidi(str) {
         const m = /^([A-G])(#?)(-?\d+)$/i.exec(str.trim());
         if (!m) return null;
@@ -749,14 +789,13 @@
         };
       }
 
-      // Render String Pills
       function renderStringPills() {
         stringPillsEl.innerHTML = "";
         const list = PRESETS[currentPreset];
         if (!list) {
           const info = document.createElement("div");
           info.className = "s-pill active";
-          info.textContent = "Chromatic Auto-Detect (A0 – C7)";
+          info.textContent = "Chromatic Mode (All 12 Semitones Active)";
           stringPillsEl.appendChild(info);
           return;
         }
@@ -771,7 +810,7 @@
           } else if (lockedMidi === midi) {
             btn.classList.add("active");
           }
-          btn.textContent = `${ list.length - idx }: ${noteStr}`;
+          btn.textContent = `${list.length - idx}: ${noteStr}`;
           btn.addEventListener("click", () => {
             if (manualMidiLock === midi) {
               manualMidiLock = null;
@@ -779,6 +818,8 @@
             } else {
               manualMidiLock = midi;
               lockedMidi = midi;
+              smoothedFreq = midiToFreq(midi);
+              pitchMedianWindow.length = 0;
               stringBadge.textContent = `LOCKED: ${noteStr}`;
             }
             renderStringPills();
@@ -787,16 +828,13 @@
         });
       }
 
-      // Update Filter Cutoffs Based on Instrument Preset
       function updateFilterProfile() {
         if (!lpFilter || !hpFilter || !audioCtx) return;
         const isBass = currentPreset.startsWith("bass");
-        hpFilter.frequency.setTargetAtTime(isBass ? 22 : 35, audioCtx.currentTime, 0.02);
-        // Low-pass keeps harmonics 1..4 while rejecting pick noise & high metallic rattle
-        lpFilter.frequency.setTargetAtTime(isBass ? 650 : 1200, audioCtx.currentTime, 0.02);
+        hpFilter.frequency.setTargetAtTime(isBass ? 25 : 40, audioCtx.currentTime, 0.02);
+        lpFilter.frequency.setTargetAtTime(isBass ? 750 : 1400, audioCtx.currentTime, 0.02);
       }
 
-      // Initialize Audio Context & Conditioning Graph
       async function ensureAudioGraph() {
         if (!audioCtx) {
           const AC = window.AudioContext || window.webkitAudioContext;
@@ -809,26 +847,19 @@
           gainNode = audioCtx.createGain();
           gainNode.gain.value = parseFloat(gainSlider.value);
 
-          // Stage 1: Sub-rumble High-Pass Filter
           hpFilter = audioCtx.createBiquadFilter();
           hpFilter.type = "highpass";
           hpFilter.Q.value = 0.707;
 
-          // Stage 2: High-transient Low-Pass Filter
           lpFilter = audioCtx.createBiquadFilter();
           lpFilter.type = "lowpass";
           lpFilter.Q.value = 0.707;
 
-          // 4096-sample window (~92.8ms @ 44.1kHz) resolves low B0/E1/E2 plus harmonics
           analyser = audioCtx.createAnalyser();
           analyser.fftSize = 4096;
           analyser.smoothingTimeConstant = 0;
 
           timeBuffer = new Float32Array(analyser.fftSize);
-          hannWindow = new Float32Array(analyser.fftSize);
-          for (let i = 0; i < analyser.fftSize; i++) {
-            hannWindow[i] = 0.5 * (1 - Math.cos((2 * Math.PI * i) / (analyser.fftSize - 1)));
-          }
 
           gainNode.connect(hpFilter);
           hpFilter.connect(lpFilter);
@@ -837,7 +868,6 @@
         }
       }
 
-      // Microphone Start / Stop
       async function toggleMic() {
         errorBanner.style.display = "none";
         if (micStream) {
@@ -893,7 +923,14 @@
         if (!synthActive) liveDot.classList.remove("live");
       }
 
-      // Built-In Harmonic Test Tone (Simulates Missing Fundamental on Phone Mic)
+      function updateSynthFrequencies() {
+        if (!synthActive || !audioCtx) return;
+        const baseE2 = midiToFreq(40) * Math.pow(2, synthDetuneCents / 1200);
+        synthOscs.forEach((osc, i) => {
+          osc.frequency.setTargetAtTime(baseE2 * (i + 1), audioCtx.currentTime, 0.01);
+        });
+      }
+
       async function toggleSynth() {
         if (synthActive) {
           stopSynth();
@@ -905,14 +942,14 @@
         synthGain = audioCtx.createGain();
         synthGain.gain.value = 0.15;
 
-        // Play E2 (82.41 Hz) with weak fundamental and strong 2nd/3rd harmonics (+1.5 cents sharp test)
-        const baseFreq = midiToFreq(40) * Math.pow(2, 1.5 / 1200);
-        const amps = [0.15, 0.85, 0.60, 0.35]; // Weak f0, strong 2f0 & 3f0
+        const baseE2 = midiToFreq(40) * Math.pow(2, synthDetuneCents / 1200);
+        // Simulate phone mic: almost no fundamental (10%), strong 2nd (90%) & 3rd (65%) harmonics
+        const amps = [0.10, 0.90, 0.65, 0.40];
         synthOscs = amps.map((amp, i) => {
           const osc = audioCtx.createOscillator();
           const g = audioCtx.createGain();
           osc.type = "sine";
-          osc.frequency.value = baseFreq * (i + 1);
+          osc.frequency.value = baseE2 * (i + 1);
           g.gain.value = amp;
           osc.connect(g);
           g.connect(synthGain);
@@ -922,6 +959,7 @@
 
         synthGain.connect(gainNode);
         synthActive = true;
+        synthPanel.style.display = "flex";
         synthBtn.textContent = "Stop Tone";
         synthBtn.classList.add("primary");
         liveDot.classList.add("live");
@@ -937,270 +975,287 @@
           synthGain = null;
         }
         synthActive = false;
+        synthPanel.style.display = "none";
         synthBtn.textContent = "Test Tone";
         synthBtn.classList.remove("primary");
         if (!micStream) liveDot.classList.remove("live");
       }
 
       // =========================================================================
-      // CORE DSP: Harmonic-Restored NSDF Pitch Detector (Solves Missing Fundamental)
+      // HELPER: Normalized Autocorrelation at a Specific Lag (with Fractional Interpolation)
       // =========================================================================
-      function detectPitchHarmonicNSDF(buf, sampleRate) {
-        const N = 2048; // Use latest 2048 samples for low latency while keeping 1024 lag reach (~43Hz)
-        const offset = buf.length - N;
+      function corrAtIntLag(buf, offset, N, tau) {
+        if (tau < 2 || tau >= N - 2) return 0;
+        let acf = 0;
+        let div = 0;
+        const limit = N - tau;
+        for (let i = 0; i < limit; i += 2) {
+          const a = buf[offset + i];
+          const b = buf[offset + i + tau];
+          acf += a * b;
+          div += a * a + b * b;
+        }
+        return div > 1e-9 ? (2 * acf) / div : 0;
+      }
 
-        const minFreq = currentPreset.startsWith("bass") ? 28 : 55;
-        const maxFreq = 1100;
-        const minTau = Math.max(2, Math.floor(sampleRate / maxFreq));
-        const maxTau = Math.min(N - 2, Math.ceil(sampleRate / minFreq));
+      // Refines a local peak around expectedTau and returns { refinedTau, corr }
+      function refinePeakNearLag(buf, offset, N, centerTau, searchRadius) {
+        const minT = Math.max(3, Math.floor(centerTau - searchRadius));
+        const maxT = Math.min(N - 4, Math.ceil(centerTau + searchRadius));
+        if (minT >= maxT) return null;
 
-        const nsdf = new Float32Array(maxTau + 1);
+        let bestTau = minT;
+        let bestVal = -1;
+        for (let t = minT; t <= maxT; t++) {
+          const v = corrAtIntLag(buf, offset, N, t);
+          if (v > bestVal) {
+            bestVal = v;
+            bestTau = t;
+          }
+        }
 
-        // Compute Normalized Square Difference Function
-        for (let tau = minTau; tau <= maxTau; tau++) {
-          let acf = 0;
-          let divisor = 0;
-          const limit = N - tau;
-          for (let i = 0; i < limit; i += 2) { // Stride 2 for mobile CPU efficiency
+        if (bestVal < 0.25) return null;
+
+        // Parabolic sub-sample interpolation using stride-1 around bestTau
+        const corrExact = (tau) => {
+          let acf = 0, div = 0;
+          const lim = N - tau;
+          for (let i = 0; i < lim; i++) {
             const a = buf[offset + i];
             const b = buf[offset + i + tau];
             acf += a * b;
-            divisor += a * a + b * b;
+            div += a * a + b * b;
           }
-          nsdf[tau] = divisor > 1e-9 ? (2 * acf) / divisor : 0;
+          return div > 1e-9 ? (2 * acf) / div : 0;
+        };
+
+        const y1 = corrExact(bestTau - 1);
+        const y2 = corrExact(bestTau);
+        const y3 = corrExact(bestTau + 1);
+        const denom = y1 - 2 * y2 + y3;
+        let frac = 0;
+        if (Math.abs(denom) > 1e-9) {
+          frac = (0.5 * (y1 - y3)) / denom;
+          frac = Math.max(-0.5, Math.min(0.5, frac));
         }
 
-        // Collect all positive-region local maxima after zero-crossings
-        const peaks = [];
-        let inPositive = false;
-        let curMaxTau = 0;
-        let curMaxVal = -1;
-
-        for (let tau = minTau; tau <= maxTau; tau++) {
-          const val = nsdf[tau];
-          if (val > 0) {
-            if (!inPositive) {
-              inPositive = true;
-              curMaxTau = tau;
-              curMaxVal = val;
-            } else if (val > curMaxVal) {
-              curMaxVal = val;
-              curMaxTau = tau;
-            }
-          } else if (inPositive) {
-            if (curMaxVal > 0.35) {
-              peaks.push({ tau: curMaxTau, val: curMaxVal });
-            }
-            inPositive = false;
-          }
-        }
-        if (inPositive && curMaxVal > 0.35) {
-          peaks.push({ tau: curMaxTau, val: curMaxVal });
-        }
-
-        if (peaks.length === 0) return null;
-
-        // Subharmonic Reinforcement:
-        // When the fundamental is weak/missing on a phone mic, tau_0 still has strong correlation
-        // AND 2*tau_0 also has a peak, whereas tau_0/2 (2nd harmonic period) does NOT match odd harmonics (3f0).
-        // We evaluate each candidate peak with subharmonic verification.
-        let globalMaxScore = 0;
-        peaks.forEach(p => {
-          const doubleTau = p.tau * 2;
-          const subSupport = doubleTau <= maxTau ? Math.max(0, nsdf[doubleTau]) : 0;
-          p.score = p.val + 0.18 * subSupport;
-          if (p.score > globalMaxScore) globalMaxScore = p.score;
-        });
-
-        // McLeod First-Peak Threshold (picks fundamental period instead of sub-octave)
-        const threshold = 0.86 * globalMaxScore;
-        let chosen = peaks[0];
-        for (let i = 0; i < peaks.length; i++) {
-          if (peaks[i].score >= threshold) {
-            chosen = peaks[i];
-            break;
-          }
-        }
-
-        // Subharmonic Octave Check:
-        // If a peak at 2 * chosen.tau exists and is nearly as strong as chosen.tau,
-        // it means chosen.tau locked onto the 2nd harmonic because 3f0 was also present at 2*chosen.tau.
-        const subCand = peaks.find(p => Math.abs(p.tau - chosen.tau * 2) <= 3);
-        if (subCand && subCand.val >= chosen.val * 0.90) {
-          chosen = subCand;
-        }
-
-        // Parabolic Interpolation for sub-sample precision
-        const t = chosen.tau;
-        let refinedTau = t;
-        if (t > minTau && t < maxTau) {
-          const y1 = nsdf[t - 1];
-          const y2 = nsdf[t];
-          const y3 = nsdf[t + 1];
-          const denom = y1 - 2 * y2 + y3;
-          if (Math.abs(denom) > 1e-9) {
-            refinedTau = t + (0.5 * (y1 - y3)) / denom;
-          }
-        }
-
-        const rawFreq = sampleRate / refinedTau;
         return {
-          freq: rawFreq,
-          clarity: Math.min(1, Math.max(0, chosen.val))
+          refinedTau: bestTau + frac,
+          corr: Math.max(0, Math.min(1, y2))
         };
       }
 
       // =========================================================================
-      // TARGET NOTE SELECTION WITH HYSTERESIS (Prevents Jumping Between Notes)
+      // STAGE 1 & 2: Harmonic-Restored Pitch & String Detector
       // =========================================================================
-      function selectTargetMidiWithHysteresis(detectedFreq) {
-        if (manualMidiLock !== null) {
-          return manualMidiLock;
-        }
-
-        const presetList = PRESETS[currentPreset];
-        let bestCandidate = null;
-
-        if (!presetList) {
-          // Chromatic Mode
-          bestCandidate = Math.round(freqToMidiFloat(detectedFreq));
-        } else {
-          // Instrument Preset Mode: Snap to nearest string in preset (measured in cents)
-          let minAbsCents = Infinity;
-          presetList.forEach(noteStr => {
-            const m = noteStrToMidi(noteStr);
-            if (m === null) return;
-            const targetF = midiToFreq(m);
-            // Also check if detectedFreq accidentally locked onto 2nd harmonic of a preset string
-            const centsDirect = Math.abs(1200 * Math.log2(detectedFreq / targetF));
-            if (centsDirect < minAbsCents) {
-              minAbsCents = centsDirect;
-              bestCandidate = m;
-            }
-          });
-        }
-
-        if (lockedMidi === null) {
-          lockedMidi = bestCandidate;
-          renderStringPills();
-          return lockedMidi;
-        }
-
-        if (bestCandidate === lockedMidi) {
-          switchCounter = 0;
-          return lockedMidi;
-        }
-
-        // Check how far we are from currently locked note in cents
-        const centsFromLocked = Math.abs(1200 * Math.log2(detectedFreq / midiToFreq(lockedMidi)));
-
-        // Hysteresis Deadzone: Keep current note unless signal moves > 65 cents away for 6 frames
-        if (centsFromLocked > 65) {
-          if (switchCandidateMidi === bestCandidate) {
-            switchCounter++;
-            if (switchCounter >= 6) {
-              lockedMidi = bestCandidate;
-              switchCounter = 0;
-              // Reset phase trackers on note change
-              prevRawHarmonicPhase.fill(null);
-              renderStringPills();
-            }
-          } else {
-            switchCandidateMidi = bestCandidate;
-            switchCounter = 1;
-          }
-        } else {
-          switchCounter = 0;
-        }
-
-        return lockedMidi;
-      }
-
-      // =========================================================================
-      // DIRECT HETERODYNE QUADRATURE HARMONIC STROBE DEMODULATOR
-      // =========================================================================
-      // Directly correlates incoming audio buffer against m * f_target (m = 1, 2, 3, 4).
-      // Even when 1*f_target is missing from the mic, 2*f_target, 3*f_target, and 4*f_target
-      // lock onto the instrument's real acoustic overtones with true phase coherence!
-      function computeHarmonicQuadrature(buf, sampleRate, targetFreq, dt) {
-        const N = 2048;
+      function analyzeAudioFrame(buf, sampleRate) {
+        const N = 3072; // Long window (~70ms) captures multiple periods of low B0/E1/E2
         const offset = buf.length - N;
-        const twoPiOverFs = (2 * Math.PI) / sampleRate;
 
-        const alphaMap = { 1: 0.32, 2: 0.16, 3: 0.07 };
-        const alpha = alphaMap[smoothingMode] || 0.16;
+        // Step A: Determine which Target Note is being played
+        let activeTargetMidi = manualMidiLock;
+        const presetList = PRESETS[currentPreset];
 
-        let totalMag = 1e-9;
+        if (activeTargetMidi === null) {
+          if (presetList) {
+            // In Instrument Preset Mode: Evaluate each string's Harmonic Period Comb!
+            // For a candidate string with fundamental period T0, both T0 and 2*T0 have high correlation,
+            // AND we check that T0/2 isn't falsely beating a lower string.
+            let bestMidi = null;
+            let bestCombScore = -1;
+
+            presetList.forEach(noteStr => {
+              const midi = noteStrToMidi(noteStr);
+              if (midi === null) return;
+              const f0 = midiToFreq(midi);
+              const expectedTau = sampleRate / f0;
+              // Allow +/- 18% frequency pull around each string when searching
+              const radius = Math.max(3, Math.round(expectedTau * 0.14));
+              const peak1 = refinePeakNearLag(buf, offset, N, expectedTau, radius);
+              const peak2 = refinePeakNearLag(buf, offset, N, expectedTau * 0.5, Math.max(2, Math.round(radius * 0.5)));
+
+              const c1 = peak1 ? peak1.corr : 0;
+              const c2 = peak2 ? peak2.corr : 0;
+
+              // Check if sub-octave (2 * expectedTau) has equal correlation; if so, this candidate is a 2nd harmonic of a lower string!
+              let subPenalty = 0;
+              if (expectedTau * 2 < N - 8) {
+                const subPeak = refinePeakNearLag(buf, offset, N, expectedTau * 2, radius * 2);
+                if (subPeak && subPeak.corr > c1 * 0.92) {
+                  subPenalty = 0.45;
+                }
+              }
+
+              // Give hysteresis bonus to currently locked string so it never chatters
+              const hysteresisBonus = (lockedMidi === midi) ? 0.15 : 0;
+              const score = c1 * 0.75 + c2 * 0.25 - subPenalty + hysteresisBonus;
+
+              if (score > bestCombScore) {
+                bestCombScore = score;
+                bestMidi = midi;
+              }
+            });
+
+            if (bestCombScore < 0.32) return null;
+
+            // Apply frame-count hysteresis before switching strings
+            if (lockedMidi === null) {
+              lockedMidi = bestMidi;
+              renderStringPills();
+            } else if (bestMidi !== lockedMidi) {
+              if (candidateMidi === bestMidi) {
+                candidateFrames++;
+                if (candidateFrames >= 8) {
+                  lockedMidi = bestMidi;
+                  candidateFrames = 0;
+                  pitchMedianWindow.length = 0;
+                  renderStringPills();
+                }
+              } else {
+                candidateMidi = bestMidi;
+                candidateFrames = 1;
+              }
+            } else {
+              candidateFrames = 0;
+            }
+            activeTargetMidi = lockedMidi;
+          } else {
+            // Chromatic Mode: Global McLeod NSDF scan
+            const minTau = Math.floor(sampleRate / 1050);
+            const maxTau = Math.min(N - 4, Math.ceil(sampleRate / 35));
+            let inPos = false, pTau = 0, pVal = -1;
+            const peaks = [];
+
+            for (let t = minTau; t <= maxTau; t += 2) {
+              const v = corrAtIntLag(buf, offset, N, t);
+              if (v > 0) {
+                if (!inPos || v > pVal) { inPos = true; pVal = v; pTau = t; }
+              } else if (inPos) {
+                if (pVal > 0.4) peaks.push({ tau: pTau, val: pVal });
+                inPos = false;
+              }
+            }
+            if (inPos && pVal > 0.4) peaks.push({ tau: pTau, val: pVal });
+            if (peaks.length === 0) return null;
+
+            let maxV = 0;
+            peaks.forEach(p => { if (p.val > maxV) maxV = p.val; });
+            let chosen = peaks.find(p => p.val >= 0.85 * maxV) || peaks[0];
+
+            // Subharmonic check for missing fundamental
+            const sub = peaks.find(p => Math.abs(p.tau - chosen.tau * 2) <= 4);
+            if (sub && sub.val >= chosen.val * 0.88) chosen = sub;
+
+            const roughHz = sampleRate / chosen.tau;
+            const detectedMidi = Math.round(freqToMidiFloat(roughHz));
+
+            if (lockedMidi === null) {
+              lockedMidi = detectedMidi;
+            } else if (detectedMidi !== lockedMidi) {
+              const centsDiff = Math.abs(1200 * Math.log2(roughHz / midiToFreq(lockedMidi)));
+              if (centsDiff > 65) {
+                if (candidateMidi === detectedMidi) {
+                  candidateFrames++;
+                  if (candidateFrames >= 7) {
+                    lockedMidi = detectedMidi;
+                    candidateFrames = 0;
+                    pitchMedianWindow.length = 0;
+                  }
+                } else {
+                  candidateMidi = detectedMidi;
+                  candidateFrames = 1;
+                }
+              }
+            }
+            activeTargetMidi = lockedMidi;
+          }
+        }
+
+        if (activeTargetMidi === null) return null;
+
+        // Step B: High-Precision Multi-Harmonic Period Measurement
+        // Now that activeTargetMidi is known, we measure the exact fundamental frequency using
+        // T0 (fundamental lag), T0/2 (2nd harmonic lag), and T0/3 (3rd harmonic lag) weighted by harmonic energy!
+        const targetFreq = midiToFreq(activeTargetMidi);
+        const expectedTau0 = sampleRate / targetFreq;
+
+        // First measure actual DFT harmonic magnitudes (1f0, 2f0, 3f0, 4f0) inside this buffer
         const mags = [0, 0, 0, 0];
-
+        let magSum = 1e-9;
+        const dftLen = 2048;
         for (let m = 1; m <= 4; m++) {
           const hmFreq = targetFreq * m;
           if (hmFreq > sampleRate * 0.45) continue;
-
-          const omega = twoPiOverFs * hmFreq;
-          let sumI = 0;
-          let sumQ = 0;
-
-          // Quadrature correlation with Hann window
-          for (let n = 0; n < N; n += 2) {
-            const sample = buf[offset + n] * hannWindow[n * 2];
-            const angle = omega * (sampleFrameCounter + n);
-            sumI += sample * Math.cos(angle);
-            sumQ += sample * Math.sin(angle);
+          const omega = (2 * Math.PI * hmFreq) / sampleRate;
+          let re = 0, im = 0;
+          for (let i = 0; i < dftLen; i += 2) {
+            const s = buf[offset + i];
+            const ang = omega * i;
+            re += s * Math.cos(ang);
+            im += s * Math.sin(ang);
           }
-
-          const mag = Math.hypot(sumI, sumQ);
+          const mag = Math.hypot(re, im);
           mags[m - 1] = mag;
-          totalMag += mag;
+          magSum += mag;
+        }
 
-          // Instantaneous phase difference between real harmonic m and reference m*f_target
-          const rawPhase = Math.atan2(sumQ, sumI);
+        for (let m = 0; m < 4; m++) {
+          harmonicStrengths[m] = 0.75 * harmonicStrengths[m] + 0.25 * (mags[m] / magSum);
+        }
 
-          if (prevRawHarmonicPhase[m - 1] !== null && mag > 1e-4) {
-            // Unwrap phase delta in [-PI, PI]
-            let dPhi = rawPhase - prevRawHarmonicPhase[m - 1];
-            while (dPhi > Math.PI) dPhi -= 2 * Math.PI;
-            while (dPhi < -Math.PI) dPhi += 2 * Math.PI;
+        // Measure sub-sample period at T0 (all harmonics), T0/2 (even harmonics), and T0/3 (3rd harmonic)
+        const searchRad0 = Math.max(4, expectedTau0 * 0.12);
+        const p1 = refinePeakNearLag(buf, offset, N, expectedTau0, searchRad0);
+        const p2 = refinePeakNearLag(buf, offset, N, expectedTau0 / 2, searchRad0 / 2);
+        const p3 = refinePeakNearLag(buf, offset, N, expectedTau0 / 3, searchRad0 / 3);
 
-            // Clamp extreme phase jumps from pluck transients
-            dPhi = Math.max(-0.85, Math.min(0.85, dPhi));
+        let fSum = 0;
+        let wSum = 0;
+        let bestClarity = 0;
 
-            ringAngularVel[m - 1] = (1 - alpha) * ringAngularVel[m - 1] + alpha * (dPhi / Math.max(0.008, dt));
+        if (p1 && p1.corr > 0.35) {
+          const f1 = sampleRate / p1.refinedTau;
+          const w1 = p1.corr * (0.6 + harmonicStrengths[0]);
+          fSum += f1 * w1;
+          wSum += w1;
+          bestClarity = Math.max(bestClarity, p1.corr);
+        }
+
+        if (p2 && p2.corr > 0.45) {
+          // Period T0/2 gives 2 * f0, so divide by 2 to get fundamental f0
+          const fFromH2 = (sampleRate / p2.refinedTau) * 0.5;
+          // Only fuse if consistent within +-120 cents of target
+          if (Math.abs(1200 * Math.log2(fFromH2 / targetFreq)) < 120) {
+            const w2 = p2.corr * harmonicStrengths[1] * 1.2;
+            fSum += fFromH2 * w2;
+            wSum += w2;
+            bestClarity = Math.max(bestClarity, p2.corr);
           }
-          prevRawHarmonicPhase[m - 1] = rawPhase;
         }
 
-        // Normalize harmonic amplitudes & compute phase-locked fundamental velocity fallback
-        let weightedBaseVel = 0;
-        let weightSum = 0;
-        for (let m = 1; m <= 4; m++) {
-          const norm = mags[m - 1] / totalMag;
-          harmonicAmps[m - 1] = 0.8 * harmonicAmps[m - 1] + 0.2 * norm;
-          // Harmonic m rotates m times faster than the fundamental for the same cents error
-          weightedBaseVel += (ringAngularVel[m - 1] / m) * norm;
-          weightSum += norm;
+        if (p3 && p3.corr > 0.45) {
+          // Period T0/3 gives 3 * f0, so divide by 3 to get fundamental f0
+          const fFromH3 = (sampleRate / p3.refinedTau) / 3.0;
+          if (Math.abs(1200 * Math.log2(fFromH3 / targetFreq)) < 120) {
+            const w3 = p3.corr * harmonicStrengths[2] * 1.1;
+            fSum += fFromH3 * w3;
+            wSum += w3;
+            bestClarity = Math.max(bestClarity, p3.corr);
+          }
         }
 
-        const consensusFundamentalVel = weightSum > 0 ? weightedBaseVel / weightSum : 0;
+        if (wSum <= 0 || bestClarity < 0.38) return null;
 
-        // Advance strobe ring phases continuously:
-        // Blended between each harmonic's true independent phase and the harmonic consensus
-        // so that if 1f0 is completely absent on a bass note, Ring 1 is still driven by 2f0/3f0/4f0!
-        for (let m = 1; m <= 4; m++) {
-          const hStrength = Math.min(1, harmonicAmps[m - 1] * 2.5);
-          const effectiveVel =
-            hStrength * ringAngularVel[m - 1] +
-            (1 - hStrength) * (consensusFundamentalVel * m);
-
-          // Note sign: negative dPhi in exp(-j*w*t) convention means input > target (sharp)
-          ringPhases[m - 1] = (ringPhases[m - 1] - effectiveVel * dt * 0.45) % (2 * Math.PI);
-        }
-
-        sampleFrameCounter = (sampleFrameCounter + Math.round(dt * sampleRate)) % 1000000;
+        return {
+          measuredFreq: fSum / wSum,
+          targetMidi: activeTargetMidi,
+          targetFreq,
+          clarity: bestClarity
+        };
       }
 
       // =========================================================================
-      // CANVAS RENDERING: 4-Ring Harmonic Wheel + Linear Strobe Ribbon
+      // CANVAS RENDERER: True Bidirectional Strobe Wheel & Ribbon
       // =========================================================================
       function drawStrobeVisuals(isActive, centsError) {
         const W = wheelCanvas.width;
@@ -1210,40 +1265,40 @@
 
         wCtx.clearRect(0, 0, W, H);
 
-        // Color transitions smoothly from Cyan -> Neon Green when within +-2 cents
         const absCents = Math.abs(centsError);
-        const inTuneRatio = isActive ? Math.max(0, 1 - absCents / 4.5) : 0;
+        const inTuneRatio = isActive ? Math.max(0, 1 - absCents / 3.5) : 0;
 
-        const rCol = Math.round(0 * inTuneRatio + 0 * (1 - inTuneRatio));
-        const gCol = Math.round(230 * inTuneRatio + 215 * (1 - inTuneRatio));
+        const rCol = 0;
+        const gCol = Math.round(230 * inTuneRatio + 218 * (1 - inTuneRatio));
         const bCol = Math.round(118 * inTuneRatio + 255 * (1 - inTuneRatio));
 
         const rings = [
-          { rIn: 48, rOut: 84, segments: 12, mIdx: 0, label: "1×" },
-          { rIn: 92, rOut: 128, segments: 24, mIdx: 1, label: "2×" },
-          { rIn: 136, rOut: 172, segments: 36, mIdx: 2, label: "3×" },
-          { rIn: 180, rOut: 218, segments: 48, mIdx: 3, label: "4×" }
+          { rIn: 46, rOut: 82, segments: 12, mIdx: 0 },
+          { rIn: 90, rOut: 126, segments: 24, mIdx: 1 },
+          { rIn: 134, rOut: 170, segments: 36, mIdx: 2 },
+          { rIn: 178, rOut: 214, segments: 48, mIdx: 3 }
         ];
 
         rings.forEach(ring => {
           const phase = ringPhases[ring.mIdx];
-          const energy = isActive ? Math.max(0.28, Math.min(1, harmonicAmps[ring.mIdx] * 2.6)) : 0.12;
+          const alpha = isActive ? Math.max(0.32, Math.min(0.98, harmonicStrengths[ring.mIdx] * 2.4)) : 0.14;
           const stepAngle = (2 * Math.PI) / ring.segments;
 
           for (let s = 0; s < ring.segments; s++) {
-            const a0 = s * stepAngle + (phase / (ring.segments / 12));
-            const a1 = a0 + stepAngle * 0.52;
+            // Note: In HTML5 Canvas, positive angle is CLOCKWISE (Right at top of wheel)
+            // and negative angle is COUNTER-CLOCKWISE (Left at top of wheel).
+            const a0 = s * stepAngle + phase - Math.PI / 2;
+            const a1 = a0 + stepAngle * 0.5;
 
             wCtx.beginPath();
             wCtx.arc(cx, cy, ring.rOut, a0, a1, false);
             wCtx.arc(cx, cy, ring.rIn, a1, a0, true);
             wCtx.closePath();
 
-            wCtx.fillStyle = `rgba(${rCol}, ${gCol}, ${bCol}, ${energy.toFixed(3)})`;
+            wCtx.fillStyle = `rgba(${rCol}, ${gCol}, ${bCol}, ${alpha.toFixed(3)})`;
             wCtx.fill();
           }
 
-          // Ring border
           wCtx.beginPath();
           wCtx.arc(cx, cy, ring.rOut, 0, 2 * Math.PI);
           wCtx.strokeStyle = "#162030";
@@ -1251,8 +1306,8 @@
           wCtx.stroke();
         });
 
-        // Static Reference Crosshairs on Wheel
-        wCtx.strokeStyle = "rgba(255, 255, 255, 0.22)";
+        // Static Reference Crosshairs
+        wCtx.strokeStyle = "rgba(255, 255, 255, 0.25)";
         wCtx.lineWidth = 2;
         wCtx.beginPath();
         wCtx.moveTo(cx, 10);
@@ -1261,48 +1316,48 @@
         wCtx.lineTo(W - 10, cy);
         wCtx.stroke();
 
-        // Linear Ribbon Strobe (2 rows: 1x Fundamental Consensus & 2x Harmonic)
+        // Linear Strobe Ribbon: Negative phase moves LEFT (Flat), Positive phase moves RIGHT (Sharp)
         const RW = ribbonCanvas.width;
         const RH = ribbonCanvas.height;
         rCtx.clearRect(0, 0, RW, RH);
 
-        const stripeSpacing = 48;
+        const baseSpacing = 52;
         const rows = [
-          { y: 4, h: 38, phase: ringPhases[0], alpha: isActive ? 0.9 : 0.15 },
-          { y: 48, h: 38, phase: ringPhases[1], alpha: isActive ? 0.75 : 0.12 }
+          { y: 5, h: 38, phase: ringPhases[0], spacing: baseSpacing, alpha: isActive ? 0.92 : 0.15 },
+          { y: 51, h: 38, phase: ringPhases[1] * 2, spacing: baseSpacing / 2, alpha: isActive ? 0.75 : 0.12 }
         ];
 
-        rows.forEach((row, idx) => {
-          const spacing = idx === 0 ? stripeSpacing : stripeSpacing / 2;
-          const offsetPx = ((row.phase / (2 * Math.PI)) * spacing * 12) % spacing;
+        rows.forEach(row => {
+          // Map 1 pattern cycle to (2*PI / 12) radians so linear ribbon matches top of wheel
+          const patternCycleRad = (2 * Math.PI) / 12;
+          const normShift = ((row.phase % patternCycleRad) + patternCycleRad) % patternCycleRad;
+          const pxOffset = (normShift / patternCycleRad) * row.spacing;
 
           rCtx.fillStyle = `rgba(${rCol}, ${gCol}, ${bCol}, ${row.alpha})`;
-          for (let x = -spacing * 2 + offsetPx; x < RW + spacing; x += spacing) {
-            rCtx.fillRect(x, row.y, spacing * 0.5, row.h);
+          for (let x = -row.spacing * 2 + pxOffset; x < RW + row.spacing; x += row.spacing) {
+            rCtx.fillRect(x, row.y, row.spacing * 0.5, row.h);
           }
         });
 
-        // Center Reference Line on Ribbon
         rCtx.fillStyle = "#ffffff";
         rCtx.fillRect(RW / 2 - 1.5, 0, 3, RH);
       }
 
       // =========================================================================
-      // MAIN ANIMATION & DSP LOOP
+      // MAIN REAL-TIME LOOP
       // =========================================================================
       let lastTime = performance.now();
-      let displayCents = 0;
 
       function updateLoop(now) {
         const dt = Math.min(0.05, (now - lastTime) / 1000);
         lastTime = now;
 
-        let signalActive = false;
+        let isTracking = false;
 
         if (analyser && (micStream || synthActive)) {
           analyser.getFloatTimeDomainData(timeBuffer);
 
-          // Compute RMS level in dB
+          // RMS Level & Gate check
           let sumSq = 0;
           for (let i = 0; i < timeBuffer.length; i++) {
             sumSq += timeBuffer[i] * timeBuffer[i];
@@ -1310,101 +1365,101 @@
           const rms = Math.sqrt(sumSq / timeBuffer.length);
           const db = 20 * Math.log10(Math.max(1e-7, rms));
 
-          // Update Level Meter UI (-65 dB to 0 dB mapped to 0..100%)
           const pct = Math.max(0, Math.min(100, ((db + 65) / 65) * 100));
           levelFill.style.width = `${pct}%`;
 
           if (db >= gateDb) {
-            const pitchResult = detectPitchHarmonicNSDF(timeBuffer, audioCtx.sampleRate);
+            const res = analyzeAudioFrame(timeBuffer, audioCtx.sampleRate);
 
-            if (pitchResult && pitchResult.clarity >= 0.42) {
-              signalActive = true;
+            if (res) {
+              isTracking = true;
+              holdFramesRemaining = 12; // Hold brief dropouts smoothly
 
-              // 5-Point Median Filter to strip pluck/transient spikes
-              medianBuf.push(pitchResult.freq);
-              if (medianBuf.length > MEDIAN_LEN) medianBuf.shift();
-              const sorted = [...medianBuf].sort((a, b) => a - b);
-              const medianFreq = sorted[Math.floor(sorted.length / 2)];
+              // 1. Median filter strips transient pluck spikes
+              pitchMedianWindow.push(res.measuredFreq);
+              if (pitchMedianWindow.length > MEDIAN_SIZE) pitchMedianWindow.shift();
+              const sorted = [...pitchMedianWindow].sort((a, b) => a - b);
+              const medianHz = sorted[Math.floor(sorted.length / 2)];
 
-              // 1D Adaptive Kalman Filter
-              if (kalmanFreq === 0 || Math.abs(medianFreq - kalmanFreq) / kalmanFreq > 0.06) {
-                kalmanFreq = medianFreq;
-                kalmanP = 1.0;
+              // 2. Heavy adaptive EMA filter for rock-solid reading
+              const alphaMap = { 1: 0.28, 2: 0.14, 3: 0.07 };
+              const alpha = alphaMap[smoothingLevel] || 0.10;
+
+              if (smoothedFreq === 0 || Math.abs(medianHz - smoothedFreq) / smoothedFreq > 0.05) {
+                smoothedFreq = medianHz;
               } else {
-                const Q = smoothingMode === 1 ? 0.08 : smoothingMode === 2 ? 0.025 : 0.008;
-                const R = (1.05 - pitchResult.clarity) * 0.45;
-                kalmanP += Q;
-                const K = kalmanP / (kalmanP + R);
-                kalmanFreq = kalmanFreq + K * (medianFreq - kalmanFreq);
-                kalmanP = (1 - K) * kalmanP;
+                smoothedFreq = (1 - alpha) * smoothedFreq + alpha * medianHz;
               }
 
-              // Determine Target Note (with Hysteresis or Preset Snapping)
-              const targetMidi = selectTargetMidiWithHysteresis(kalmanFreq);
-              let targetFreq = midiToFreq(targetMidi);
+              // 3. Exact Frequency Error (Strictly negative when flat, positive when sharp!)
+              currentDeltaHz = smoothedFreq - res.targetFreq;
+              const rawCents = 1200 * Math.log2(smoothedFreq / res.targetFreq);
+              smoothedCents = (1 - alpha) * smoothedCents + alpha * rawCents;
 
-              // Harmonic Ratio Guard: If detected kalmanFreq is actually 2x the locked preset string
-              // (common on bass/low guitar when 1f0 is 100% missing), fold kalmanFreq to fundamental
-              let effectiveMeasuredHz = kalmanFreq;
-              const ratioToTarget = kalmanFreq / targetFreq;
-              if (ratioToTarget > 1.88 && ratioToTarget < 2.12) {
-                effectiveMeasuredHz = kalmanFreq * 0.5;
-              } else if (ratioToTarget > 2.85 && ratioToTarget < 3.15) {
-                effectiveMeasuredHz = kalmanFreq / 3;
-              }
-
-              const cents = 1200 * Math.log2(effectiveMeasuredHz / targetFreq);
-              displayCents = 0.78 * displayCents + 0.22 * cents;
-
-              // Run True Heterodyne Quadrature Demodulation across harmonics 1..4
-              computeHarmonicQuadrature(timeBuffer, audioCtx.sampleRate, targetFreq, dt);
-
-              // Update UI Readouts
-              const parts = midiToParts(targetMidi);
+              // Update Digital Readout
+              const parts = midiToParts(res.targetMidi);
               noteLetterEl.textContent = parts.letter;
               noteAccEl.textContent = parts.acc;
               noteOctEl.textContent = parts.oct;
 
-              measuredHzEl.textContent = `${effectiveMeasuredHz.toFixed(2)} Hz`;
-              targetHzEl.textContent = `${targetFreq.toFixed(2)} Hz`;
-              confidenceBadge.textContent = `CLARITY: ${Math.round(pitchResult.clarity * 100)}%`;
+              measuredHzEl.textContent = `${smoothedFreq.toFixed(2)} Hz`;
+              targetHzEl.textContent = `${res.targetFreq.toFixed(2)} Hz`;
+              confidenceBadge.textContent = `LOCK: ${Math.round(res.clarity * 100)}%`;
 
-              const clampedCents = Math.max(-50, Math.min(50, displayCents));
-              const sign = displayCents > 0.05 ? "+" : "";
-              centsPillEl.textContent = `${sign}${displayCents.toFixed(1)}¢`;
+              const clampedCents = Math.max(-50, Math.min(50, smoothedCents));
+              const sign = smoothedCents > 0.05 ? "+" : "";
+              centsPillEl.textContent = `${sign}${smoothedCents.toFixed(1)}¢`;
 
               const needlePct = 50 + (clampedCents / 50) * 48;
               needleEl.style.left = `${needlePct}%`;
 
-              if (Math.abs(displayCents) <= 1.5) {
-                modeBadge.textContent = "IN TUNE";
+              if (Math.abs(smoothedCents) <= 1.2) {
+                modeBadge.textContent = "IN TUNE ●";
                 modeBadge.className = "badge locked";
                 needleEl.style.background = "var(--in-tune)";
                 noteLetterEl.style.color = "var(--in-tune)";
-              } else {
-                modeBadge.textContent = displayCents < 0 ? "FLAT ♭" : "SHARP ♯";
-                modeBadge.className = "badge";
+              } else if (smoothedCents < 0) {
+                modeBadge.textContent = "◄ FLAT ♭";
+                modeBadge.className = "badge flat";
                 needleEl.style.background = "var(--accent)";
+                noteLetterEl.style.color = "var(--text)";
+              } else {
+                modeBadge.textContent = "SHARP ♯ ►";
+                modeBadge.className = "badge sharp";
+                needleEl.style.background = "var(--warn)";
                 noteLetterEl.style.color = "var(--text)";
               }
 
-              // Update Harmonic Energy Bars (1f0, 2f0, 3f0, 4f0)
               for (let m = 1; m <= 4; m++) {
-                const hpct = Math.min(100, Math.round(harmonicAmps[m - 1] * 180));
+                const hpct = Math.min(100, Math.round(harmonicStrengths[m - 1] * 180));
                 document.getElementById(`h${m}Txt`).textContent = `${hpct}%`;
                 document.getElementById(`h${m}Bar`).style.width = `${hpct}%`;
               }
             }
           } else {
-            // Below Gate: decay angular velocity smoothly
-            modeBadge.textContent = "GATE CLOSED";
-            modeBadge.className = "badge";
+            if (holdFramesRemaining > 0) {
+              holdFramesRemaining--;
+              isTracking = true;
+            } else {
+              currentDeltaHz *= 0.85; // Smooth coast to stop when silent
+              modeBadge.textContent = "GATE CLOSED";
+              modeBadge.className = "badge";
+            }
           }
         } else {
           levelFill.style.width = "0%";
+          currentDeltaHz = 0;
         }
 
-        drawStrobeVisuals(signalActive, displayCents);
+        // Advance Strobe Phases Strictly by Signed Frequency Error (currentDeltaHz)
+        // Visual angular scale: 1 Hz error = (2*PI / 12) rad/sec (1 pattern segment per second per Hz)
+        const segmentAngle = (2 * Math.PI) / 12;
+        for (let m = 0; m < 4; m++) {
+          // Ring m has (m+1)*12 segments, so the same angle shift advances (m+1)x more segments!
+          ringPhases[m] = (ringPhases[m] + currentDeltaHz * segmentAngle * dt) % (2 * Math.PI);
+        }
+
+        drawStrobeVisuals(isTracking, smoothedCents);
         requestAnimationFrame(updateLoop);
       }
 
@@ -1412,10 +1467,24 @@
       micBtn.addEventListener("click", toggleMic);
       synthBtn.addEventListener("click", toggleSynth);
 
+      synthDetuneSlider.addEventListener("input", e => {
+        synthDetuneCents = parseFloat(e.target.value);
+        const dir =
+          Math.abs(synthDetuneCents) < 0.2
+            ? "(Locked Still ●)"
+            : synthDetuneCents < 0
+            ? "(Spins Left / CCW ◄)"
+            : "(Spins Right / CW ►)";
+        const sign = synthDetuneCents > 0 ? "+" : "";
+        synthDetuneVal.textContent = `${sign}${synthDetuneCents.toFixed(1)}¢ ${dir}`;
+        updateSynthFrequencies();
+      });
+
       presetSelect.addEventListener("change", e => {
         currentPreset = e.target.value;
         manualMidiLock = null;
         lockedMidi = null;
+        pitchMedianWindow.length = 0;
         stringBadge.textContent = "AUTO TARGET";
         customRow.style.display = currentPreset === "custom" ? "flex" : "none";
         updateFilterProfile();
@@ -1451,17 +1520,17 @@
       });
 
       smoothSlider.addEventListener("input", e => {
-        smoothingMode = parseInt(e.target.value, 10);
-        const names = { 1: "Fast", 2: "Medium", 3: "High Lock" };
-        smoothVal.textContent = names[smoothingMode];
+        smoothingLevel = parseInt(e.target.value, 10);
+        const names = { 1: "Fast", 2: "Medium", 3: "High Stability" };
+        smoothVal.textContent = names[smoothingLevel];
       });
 
       a4Slider.addEventListener("input", e => {
         a4Hz = parseInt(e.target.value, 10);
         a4Val.textContent = `${a4Hz} Hz`;
+        updateSynthFrequencies();
       });
 
-      // Initialize UI
       const initGatePct = ((gateDb + 65) / 65) * 100;
       gateMarker.style.left = `${initGatePct}%`;
       renderStringPills();
